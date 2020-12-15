@@ -1,0 +1,1 @@
+# trainee-capybara_scraper

@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path('lib', __dir__))
+
+require 'capybara'
+require 'selenium-webdriver'
+require 'section_parser'
+require 'csv_writer'
+
+ONLINER_SECTIONS = [
+  'https://people.onliner.by',
+  'https://auto.onliner.by',
+  'https://tech.onliner.by',
+  'https://people.onliner.by/opinions',
+  'https://realt.onliner.by'
+].freeze
+
+Capybara.register_driver :selenium do |app|
+  Capybara::Selenium::Driver.new(app, browser: :firefox)
+end
+
+Capybara.javascript_driver = :chrome
+
+Capybara.configure do |config|
+  config.default_max_wait_time = 10
+  config.default_driver        = :selenium
+end
+
+browser = Capybara.current_session
+writer = CSVWriter.new
+
+ONLINER_SECTIONS.each do |section|
+  browser.visit section
+  writer.write(SectionParser.new(section).parse_section)
+end
